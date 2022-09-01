@@ -26,6 +26,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"mynewt.apache.org/newt/util"
+	"mynewt.apache.org/newtmgr/hack"
 	"mynewt.apache.org/newtmgr/newtmgr/nmutil"
 	"mynewt.apache.org/newtmgr/nmxact/nmxutil"
 )
@@ -89,6 +90,9 @@ func Commands() *cobra.Command {
 
 	nmCmd.PersistentFlags().StringVar(&nmxutil.OmpRes, "ompres", "/omgr",
 		"Use this CoAP resource instead of /omgr")
+
+	nmCmd.PersistentFlags().BoolVar(&hack.UsingAlignmentPatch, "debug-use-alignment-patch", false, "(DEBUG) Use the alignment patch")
+	nmCmd.PersistentFlags().BoolVar(&hack.DisablingDelay, "debug-disable-delay", false, "(DEBUG) Disable delay")
 
 	versCmd := &cobra.Command{
 		Use:     "version",

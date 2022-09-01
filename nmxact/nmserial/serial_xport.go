@@ -35,6 +35,7 @@ import (
 	"github.com/tarm/serial"
 
 	"mynewt.apache.org/newt/util"
+	"mynewt.apache.org/newtmgr/hack"
 	"mynewt.apache.org/newtmgr/nmxact/sesn"
 )
 
@@ -273,10 +274,12 @@ func (sx *SerialXport) Tx(bytes []byte) error {
 		if written == 0 {
 			sx.txRaw([]byte{6, 9})
 		} else {
-			/* slower platforms take some time to process each segment
-			 * and have very small receive buffers.  Give them a bit of
-			 * time here */
-			time.Sleep(20 * time.Millisecond)
+			if !hack.DisablingDelay {
+				/* slower platforms take some time to process each segment
+				 * and have very small receive buffers.  Give them a bit of
+				 * time here */
+				time.Sleep(20 * time.Millisecond)
+			}
 			sx.txRaw([]byte{4, 20})
 		}
 
@@ -286,8 +289,12 @@ func (sx *SerialXport) Tx(bytes []byte) error {
 		 * we need to save room for the header (2 byte) and
 		 * carriage return (and possibly LF 2 bytes), */
 
-		/* all totaled, 124 bytes should work */
-		writeLen := util.Min(512, totlen-written)
+		var maxSize = 124
+		if hack.UsingAlignmentPatch {
+			maxSize = 1024
+		}
+
+		writeLen := util.Min(maxSize, totlen-written)
 
 		writeBytes := base64Data[written : written+writeLen]
 		sx.txRaw(writeBytes)
